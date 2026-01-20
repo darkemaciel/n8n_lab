@@ -9,8 +9,6 @@
   └── start.sh               ← Iniciar (validações robustas)
   └── stop.sh                ← Parar
   └── validate_workflows.sh  ← Validar estrutura
-  └── setup.sh               ← Setup automático
-  └── manage_workflows.sh    ← Gerenciar workflows
 
 ✅ WORKFLOWS ESTRUTURADOS
   └── ingestion/             ← Integração de dados

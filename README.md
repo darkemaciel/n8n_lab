@@ -148,9 +148,7 @@ n8n_lab/
 ├── 📁 scripts/                     # Scripts de automação
 │   ├── start.sh                    # Iniciar ambiente
 │   ├── stop.sh                     # Parar ambiente
-│   ├── validate_workflows.sh       # Validar workflows
-│   ├── setup.sh                    # Setup automático
-│   └── manage_workflows.sh         # Gerenciar workflows
+│   └── validate_workflows.sh       # Validar workflows
 │
 ├── 📁 workflows/                   # Seus workflows
 │   ├── ingestion/                  # Integração de dados
@@ -393,7 +391,7 @@ docker compose -f infra/docker-compose.yml logs -f
 
 ## Comandos Úteis
 
-### Setup e Inicialização
+### Inicialização Básica
 
 ```bash
 # Copiar configuração
@@ -405,6 +403,9 @@ bash scripts/start.sh
 # Parar ambiente
 bash scripts/stop.sh
 
+# Ver status dos containers
+docker ps
+
 # Parar e remover volumes (limpeza completa)
 docker compose -f infra/docker-compose.yml down -v
 ```
@@ -412,25 +413,14 @@ docker compose -f infra/docker-compose.yml down -v
 ### Validação
 
 ```bash
-# Validar workflows
+# Validar estrutura de workflows
 bash scripts/validate_workflows.sh
 
-# Ver status dos containers
-docker ps
+# Validar arquivo JSON manualmente
+python3 -m json.tool workflows/seu_workflow/workflow.json
 
-# Ver versões
-docker --version
-docker compose version
-```
-
-### Gerenciamento de Workflows
-
-```bash
-# Listar workflows
-bash scripts/manage_workflows.sh list
-
-# Validar arquivo JSON
-bash scripts/manage_workflows.sh validate workflows/seu_workflow.json
+# Listar todos os workflows locais
+find workflows -name "*.json" -type f
 ```
 
 ### Debug
@@ -442,8 +432,9 @@ docker compose -f infra/docker-compose.yml logs -f
 # Conectar ao PostgreSQL
 docker exec -it n8n_postgres psql -U n8n -d n8n
 
-# Executar comando no container n8n
-docker exec -it n8n bash
+# Ver versões instaladas
+docker --version
+docker compose version
 ```
 
 ---

@@ -1,13 +1,13 @@
 # 🚀 n8n Lab - Quick Reference
 
-## ⚡ 3 Comandos Essenciais
+## ⚡ 3 Scripts Essenciais
 
 ```bash
 # 1. Iniciar
 bash scripts/start.sh
 
-# 2. Acessar
-http://localhost:5678
+# 2. Validar
+bash scripts/validate_workflows.sh
 
 # 3. Parar
 bash scripts/stop.sh
