@@ -33,9 +33,10 @@ if docker compose -f infra/docker-compose.yml --env-file infra/.env ps | grep -q
     echo "✅ n8n Lab started successfully!"
     echo ""
     echo "📋 Access points:"
-    echo "   n8n:     http://localhost:5678"
-    echo "   pgAdmin: http://localhost:5050"
+    echo "   n8n (local):  http://localhost:5678"
+    echo "   n8n (public): https://N8N_HOST (via ngrok cloud)"
     echo ""
+    echo "ℹ️  Configure N8N_HOST, N8N_PROTOCOL and WEBHOOK_URL in infra/.env with your ngrok URL"
     echo "ℹ️  Use 'bash scripts/stop.sh' to stop all services."
 else
     echo "⚠️  Some services may not be running. Check logs with: docker compose -f infra/docker-compose.yml logs"
