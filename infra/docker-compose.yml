@@ -2,6 +2,8 @@
 networks:
   n8n_net:
     driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
 
 volumes:
   n8n_data:
@@ -10,14 +12,14 @@ services:
   n8n:
     image: n8nio/n8n:latest
     container_name: n8n
-    restart: unless-stopped
+    restart: "no"
 
     ports:
       - "5678:5678"
 
     dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      - 1.1.1.1
+      - 1.0.0.1
 
     environment:
       # =========================
@@ -30,6 +32,7 @@ services:
       DB_POSTGRESDB_USER: ${SUPABASE_DB_USER}
       DB_POSTGRESDB_PASSWORD: ${SUPABASE_DB_PASSWORD}
       DB_POSTGRESDB_SSL: "true"
+      DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED: "false"
 
       # =========================
       # Auth
@@ -37,6 +40,7 @@ services:
       N8N_BASIC_AUTH_ACTIVE: "true"
       N8N_BASIC_AUTH_USER: ${N8N_USER}
       N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
 
       # =========================
       # Webhook / Public URL
