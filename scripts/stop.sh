@@ -13,8 +13,15 @@ fi
 if docker compose -f infra/docker-compose.yml ps | grep -q "docker-compose"; then
     docker compose -f infra/docker-compose.yml down
     echo "✅ n8n Lab stopped successfully."
-    echo ""
-    echo "📋 Containers and volumes are preserved for next startup."
 else
     echo "ℹ️  No running n8n Lab services found."
 fi
+
+# Kill ngrok if running
+if pgrep -x "ngrok" > /dev/null; then
+    killall ngrok 2>/dev/null || true
+    echo "✅ ngrok tunnel closed."
+fi
+
+echo ""
+echo "📋 Containers and volumes are preserved for next startup."
