@@ -68,10 +68,26 @@ Edite `infra/.env` com seus valores:
 code infra/.env  # ou vim, nano, etc
 ```
 
+#### 🔐 Obtendo Credenciais do Supabase
+
+Para usar a conexão com o Supabase, siga estes passos:
+
+1. Acesse seu projeto no [Supabase Dashboard](https://app.supabase.com)
+2. No menu lateral, clique em **"Connect"** (ou ícone de conexão)
+3. Na parte superior, altere o **Method** de **"Direct Connection"** para **"Session Pooler"**
+4. Copie os seguintes valores (usando IPv4):
+   - `Host` → Use como `SUPABASE_DB_HOST`
+   - `Database` → Use como `SUPABASE_DB_NAME` 
+   - `User` → Use como `SUPABASE_DB_USER` 
+   - `Port` → Use como `SUPABASE_DB_PORT` 
+
+**Nota:** Session Pooler é recomendado para aplicações que estabelecem muitas conexões simultâneas. Isso melhora a performance e evita limites de conexão.
+
 **Obrigatório configurar:**
-- `SUPABASE_DB_HOST` - Host do seu projeto Supabase
+- `SUPABASE_DB_HOST` - Host do seu projeto Supabase (Session Pooler)
 - `SUPABASE_DB_USER` - Usuário do banco
 - `SUPABASE_DB_PASSWORD` - Senha do banco
+- `SUPABASE_DB_PORT` - Porta do pooler
 - `NGROK_AUTHTOKEN` - Token ngrok ([obter aqui](https://dashboard.ngrok.com/auth/your-authtoken))
 - `N8N_PASSWORD` - Senha do n8n (mude de `CHANGE_ME`)
 - `N8N_ENCRYPTION_KEY` - Gere uma nova: `openssl rand -hex 32`
@@ -91,7 +107,7 @@ O script automaticamente:
 
 ### 5️⃣ Acesse o n8n
 
-**Credenciais:** `admin` / `<N8N_PASSWORD do .env>`
+**Credenciais:** `seu e-mail` / `<N8N_PASSWORD do .env>`
 
 ✅ **Pronto para usar!**
 
