@@ -38,6 +38,10 @@ Antes de começar, certifique-se de ter instalado:
 - ✅ **ngrok** instalado ([Download](https://ngrok.com/download) ou `sudo apt-get install ngrok`)
 - ✅ **Conexão com internet**
 - ✅ **Porta 5678 disponível** (n8n)
+- ✅ **WSL** (Windows Subsystem for Linux) recomendado para usuários Windows
+
+⚠️ Importante (Windows): Execute os scripts dentro do WSL (Ubuntu/Linux).
+Rodar os scripts diretamente no PowerShell ou CMD pode causar erros de compatibilidade (quebra de linha, permissões e bash).
 
 Verificar instalação:
 ```bash
@@ -80,34 +84,14 @@ Para usar a conexão com o Supabase, siga estes passos:
    - `Database` → Use como `SUPABASE_DB_NAME` 
    - `User` → Use como `SUPABASE_DB_USER` 
    - `Port` → Use como `SUPABASE_DB_PORT` 
+5. Crie um schema para as tabelas de aplicação do n8n. No SQL Editor use o SQL -> "CREATE SCHEMA n8n;"
 
 **Nota:** Session Pooler é recomendado para aplicações que estabelecem muitas conexões simultâneas. Isso melhora a performance e evita limites de conexão.
 
-**Obrigatório configurar:**
-- `SUPABASE_DB_HOST` - Host do seu projeto Supabase (Session Pooler)
-- `SUPABASE_DB_USER` - Usuário do banco
-- `SUPABASE_DB_PASSWORD` - Senha do banco
-- `SUPABASE_DB_PORT` - Porta do pooler
-- `NGROK_AUTHTOKEN` - Token ngrok ([obter aqui](https://dashboard.ngrok.com/auth/your-authtoken))
-- `N8N_PASSWORD` - Senha do n8n (mude de `CHANGE_ME`)
-- `N8N_ENCRYPTION_KEY` - Gere uma nova: `openssl rand -hex 32`
 
-### 4️⃣ Execute o Script de Inicialização
+### 4️⃣ Acesse o n8n
 
-```bash
-bash scripts/start.sh
-```
-
-O script automaticamente:
-- ✅ Valida Docker e `.env`
-- ✅ Inicia container n8n
-- ✅ Inicia ngrok em background
-- ✅ Atualiza `.env` com a URL pública do ngrok
-- ✅ Exibe links de acesso
-
-### 5️⃣ Acesse o n8n
-
-**Credenciais:** `seu e-mail` / `<N8N_PASSWORD do .env>`
+**Credenciais:** `Sua credencial está no banco do Supabase, caso dê algum problema com o login, drope e crie novamente o schema n8n e use o script novamente.` 
 
 ✅ **Pronto para usar!**
 
