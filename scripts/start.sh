@@ -11,23 +11,15 @@ if [ ! -f "infra/.env" ]; then
     exit 1
 fi
 
-# Verificar se docker está rodando
+# Verificar docker
 if ! docker info > /dev/null 2>&1; then
     echo "❌ Error: Docker daemon is not running!"
     exit 1
 fi
 
-echo "📦 Pulling latest images..."
-docker compose -f infra/docker-compose.yml --env-file infra/.env pull
-
-echo "🔧 Starting services..."
-docker compose -f infra/docker-compose.yml --env-file infra/.env up -d
-
-echo "⏳ Waiting for services to be ready..."
-sleep 5
-
 echo "🚀 Starting ngrok tunnel..."
-# Load environment variables
+
+# Load env
 source infra/.env
 
 if [ -z "$NGROK_AUTHTOKEN" ]; then
@@ -35,79 +27,69 @@ if [ -z "$NGROK_AUTHTOKEN" ]; then
     exit 1
 fi
 
-# Check if ngrok is installed
+# Check ngrok
 if ! command -v ngrok &> /dev/null; then
     echo "❌ Error: ngrok is not installed!"
-    echo ""
-    echo "📥 Install ngrok:"
-    echo "   1. Download from: https://ngrok.com/download"
-    echo "   2. Extract and add to PATH"
-    echo "   3. Or install via package manager:"
-    echo "      Ubuntu/Debian: sudo apt-get install ngrok"
-    echo "      macOS: brew install ngrok"
     exit 1
 fi
 
-# Kill any existing ngrok processes
+# Kill existing ngrok
 pkill -f "ngrok http" 2>/dev/null || true
 sleep 1
 
-# Start ngrok in background
-echo "   Starting ngrok (auth token: ${NGROK_AUTHTOKEN:0:10}...)"
+# Start ngrok
 ngrok http 5678 --authtoken "$NGROK_AUTHTOKEN" > /tmp/ngrok.log 2>&1 &
 NGROK_PID=$!
 sleep 4
 
-# Check if ngrok started successfully
 if ! kill -0 $NGROK_PID 2>/dev/null; then
     echo "❌ Error: ngrok failed to start"
-    echo "   Logs:"
     cat /tmp/ngrok.log
     exit 1
 fi
 
-# Fetch ngrok public URL
-NGROK_URL=$(curl -s http://localhost:4040/api/tunnels 2>/dev/null | grep -o '"public_url":"[^"]*' | head -1 | cut -d'"' -f4)
+# Fetch URL
+NGROK_URL=$(curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"[^"]*' | head -1 | cut -d'"' -f4)
 
 if [ -z "$NGROK_URL" ]; then
-    echo "⚠️  Warning: Could not fetch ngrok URL yet. Retrying..."
-    sleep 2
-    NGROK_URL=$(curl -s http://localhost:4040/api/tunnels 2>/dev/null | grep -o '"public_url":"[^"]*' | head -1 | cut -d'"' -f4)
+    echo "❌ Could not fetch ngrok URL"
+    exit 1
 fi
 
-if [ -z "$NGROK_URL" ]; then
-    echo "⚠️  Warning: Could not fetch ngrok URL. Check if ngrok started correctly."
-    echo "    Logs: cat /tmp/ngrok.log"
-    echo "    Dashboard: http://localhost:4040"
-else
-    echo "✅ ngrok tunnel established: $NGROK_URL"
-    
-    # Update .env with ngrok URL
-    NGROK_HOST=$(echo "$NGROK_URL" | sed 's|https://||' | sed 's|http://||')
-    sed -i "s|^N8N_HOST=.*|N8N_HOST=$NGROK_HOST|" infra/.env
-    sed -i "s|^WEBHOOK_URL=.*|WEBHOOK_URL=$NGROK_URL|" infra/.env
-    
-    echo "📝 Updated infra/.env with ngrok URL"
-fi
+echo "✅ ngrok tunnel: $NGROK_URL"
 
-# Verificar se todos os containers estão rodando
+NGROK_HOST=$(echo "$NGROK_URL" | sed 's|https://||' | sed 's|http://||')
+
+# Update env BEFORE docker starts
+sed -i "s|^N8N_HOST=.*|N8N_HOST=$NGROK_HOST|" infra/.env
+sed -i "s|^WEBHOOK_URL=.*|WEBHOOK_URL=$NGROK_URL|" infra/.env
+
+echo "📝 Updated infra/.env"
+
+echo "🧹 Recreating containers..."
+
+docker compose -f infra/docker-compose.yml --env-file infra/.env down
+docker compose -f infra/docker-compose.yml --env-file infra/.env pull
+docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --force-recreate
+
+sleep 5
+
 echo "🔍 Checking container status..."
-if docker compose -f infra/docker-compose.yml --env-file infra/.env ps | grep -q "running"; then
+
+if docker compose -f infra/docker-compose.yml ps | grep -q "running"; then
     echo ""
     echo "✅ n8n Lab started successfully!"
     echo ""
     echo "📋 Access points:"
     echo "   n8n (local):  http://localhost:5678"
-    NGROK_URL=$(curl -s http://localhost:4040/api/tunnels 2>/dev/null | grep -o '"public_url":"[^"]*' | head -1 | cut -d'"' -f4)
-    if [ ! -z "$NGROK_URL" ]; then
-        echo "   n8n (public): $NGROK_URL"
-    fi
+    echo "   n8n (public): $NGROK_URL"
     echo "   ngrok UI:     http://localhost:4040"
     echo ""
-    echo "🔗 Webhook URL configured in n8n: $(grep "WEBHOOK_URL=" infra/.env | cut -d'=' -f2)"
+    echo "🔗 Webhook URL: $NGROK_URL"
     echo ""
-    echo "ℹ️  Use 'bash scripts/stop.sh' to stop all services."
+    echo "ℹ️  Use 'bash scripts/stop.sh' to stop services."
 else
-    echo "⚠️  Some services may not be running. Check logs with: docker compose -f infra/docker-compose.yml logs"
+    echo "⚠️ Containers failed to start"
+    docker compose -f infra/docker-compose.yml logs
     exit 1
 fi
